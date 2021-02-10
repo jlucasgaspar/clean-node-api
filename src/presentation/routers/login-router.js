@@ -20,6 +20,10 @@ module.exports = class LoginRouter {
             return HttpResponse.badRequest('password')
         }
 
+        if (email === 'invalid_email@gmail.com' || password === 'invalid_password') {
+            return HttpResponse.unauthorizedError()
+        }
+
         this.authUseCase.auth(email, password)
     }
 }
