@@ -31,6 +31,16 @@ const makeEmailValidator = () => {
     return emailValidatorSpy
 }
 
+const makeEmailValidatorWithError = () => {
+    class EmailValidatorSpy {
+        isValid() {
+            throw new Error()
+        }
+    }
+
+    return new EmailValidatorSpy()
+}
+
 const makeAuthUseCase = () => {
     class AuthUseCaseSpy {
         async auth(email, password) {
@@ -229,7 +239,7 @@ describe('Login Router', () => {
         expect(httpResponse.body).toEqual(new InvalidParamError('email'))
     })
 
-    test('Should return 400 if no EmailValidator is provided', async () => {
+    test('Should return 500 if no EmailValidator is provided', async () => {
         const authUseCaseSpy = makeAuthUseCase()
 
         const sut = new LoginRouter(authUseCaseSpy)
@@ -247,7 +257,7 @@ describe('Login Router', () => {
         expect(httpResponse.body).toEqual(new ServerError())
     })
 
-    test('Should return 400 if no EmailValidator has no isValid method', async () => {
+    test('Should return 500 if no EmailValidator has no isValid method', async () => {
         const authUseCaseSpy = makeAuthUseCase()
 
         const sut = new LoginRouter(authUseCaseSpy, {}) // Objeto vazio seria a classe do EmailValidator vazia, sem o metodo
@@ -263,5 +273,24 @@ describe('Login Router', () => {
 
         expect(httpResponse.statusCode).toBe(500)
         expect(httpResponse.body).toEqual(new ServerError())
+    })
+
+    test('Should return 500 if EmailValidator throws an error', async () => {
+        const authUseCaseSpy = makeAuthUseCase()
+
+        const emailValidatorSpy = makeEmailValidatorWithError()
+
+        const sut = new LoginRouter(authUseCaseSpy, emailValidatorSpy)
+
+        const httpRequest = {
+            body: {
+                email: 'any_email@gmail.com',
+                password: 'any_password'
+            }
+        }
+    
+        const httpResponse = await sut.route(httpRequest)
+
+        expect(httpResponse.statusCode).toBe(500)
     })
 })
