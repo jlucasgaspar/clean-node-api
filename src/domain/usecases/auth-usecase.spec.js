@@ -101,7 +101,7 @@ describe('Auth UseCase', () => {
         expect(loadUserByEmailRepositorySpy.email).toBe('any_email@gmail.com')
     })
 
-    test('Should throw if no dependency is provided', async () => {
+    /* test('Should throw if no dependency is provided', async () => {
         const sut = new AuthUseCase()
 
         const promise = sut.auth('any_email@gmail.com', 'any_password')
@@ -123,6 +123,41 @@ describe('Auth UseCase', () => {
         const promise = sut.auth('any_email@gmail.com', 'any_password')
 
         expect(promise).rejects.toThrow(new InvalidParamError('loadUserByEmailRepository'))
+    }) */
+
+    // ESTE TESTE SUBSTITUI OS 3 COMENTADOS ACIMA [Linha 96 até linha 127]:
+    test('Should throw if invalid dependencies are provided', async () => {
+        const invalid = {}
+
+        const suts = [].concat(
+            new AuthUseCase(),
+            new AuthUseCase({ loadUserByEmailRepository: null }),
+            new AuthUseCase({ loadUserByEmailRepository: invalid }),
+            new AuthUseCase({
+                loadUserByEmailRepository: makeLoadUserByEmailRepositorySpy(),
+                encrypter: null
+            }),
+            new AuthUseCase({
+                loadUserByEmailRepository: makeLoadUserByEmailRepositorySpy(),
+                encrypter: invalid
+            }),
+            new AuthUseCase({
+                loadUserByEmailRepository: makeLoadUserByEmailRepositorySpy(),
+                encrypter: makeEncrypterSpy,
+                tokenGenerator: null
+            }),
+            new AuthUseCase({
+                loadUserByEmailRepository: makeLoadUserByEmailRepositorySpy(),
+                encrypter: makeEncrypterSpy,
+                tokenGenerator: invalid
+            })
+        )
+
+        for (const sut of suts) {
+            const promise = sut.auth('any_email@gmail.com', 'any_password')
+    
+            expect(promise).rejects.toThrow()
+        }
     })
 
     test('Should return null if an invalid email is provided', async () => {
