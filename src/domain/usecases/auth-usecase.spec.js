@@ -22,7 +22,7 @@ const makeEncrypterSpy = () => {
     return encrypterSpy
 }
 
-const makeLoadUserByEmailRepositorySpy = () => {
+const makeLoadUserByEmailRepositorySpy = () => {''
     class LoadUserByEmailRepositorySpy {
         async load(email) {
             this.email = email
@@ -62,11 +62,11 @@ const makeSut = () => {
     const loadUserByEmailRepositorySpy = makeLoadUserByEmailRepositorySpy()
     const tokenGeneratorSpy = makeTokenGeneratorSpy()
     
-    const sut = new AuthUseCase(
-        loadUserByEmailRepositorySpy,
-        encrypterSpy,
-        tokenGeneratorSpy
-    )
+    const sut = new AuthUseCase({
+        loadUserByEmailRepository: loadUserByEmailRepositorySpy,
+        encrypter: encrypterSpy,
+        tokenGenerator: tokenGeneratorSpy
+    })
 
     return {
         sut,
@@ -102,7 +102,7 @@ describe('Auth UseCase', () => {
     })
 
     test('Should throw if no LoadUserByEmailRepository is provided', async () => {
-        const sut = new AuthUseCase()
+        const sut = new AuthUseCase({})
 
         const promise = sut.auth('any_email@gmail.com', 'any_password')
 
@@ -110,7 +110,7 @@ describe('Auth UseCase', () => {
     })
 
     test('Should throw if LoadUserByEmailRepository has no load method', async () => {
-        const sut = new AuthUseCase({}) // Obj vazio quer dizer que é uma instancia inválida do LoadUserByEmailRepository
+        const sut = new AuthUseCase({ loadUserByEmailRepository: {} }) // Obj vazio quer dizer que é uma instancia inválida do LoadUserByEmailRepository
 
         const promise = sut.auth('any_email@gmail.com', 'any_password')
 
