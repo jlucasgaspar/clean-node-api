@@ -1,5 +1,3 @@
-// const { MongoClient } = require('mongodb')
-
 const { MissingParamError } = require("../../utils/errors")
 
 module.exports = class LoadUserByEmailRepository {
